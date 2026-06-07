@@ -1,0 +1,62 @@
+{
+  "appName": "ARC Multi Token DApp",
+  "version": "1.0.0",
+  "networks": {
+    "sepolia": {
+      "chainId": 11155111,
+      "name": "Sepolia",
+      "rpc": "https://rpc.sepolia.org"
+    },
+    "arbitrumSepolia": {
+      "chainId": 421614,
+      "name": "Arbitrum Sepolia",
+      "rpc": "https://sepolia-rollup.arbitrum.io/rpc"
+    },
+    "arcTestnet": {
+      "chainId": 5042002,
+      "name": "ARC Testnet",
+      "rpc": "https://rpc.testnet.arc.network"
+    }
+  },
+  "tokens": {
+    "ETH": {
+      "symbol": "ETH",
+      "type": "native",
+      "decimals": 18
+    },
+    "USDC": {
+      "symbol": "USDC",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "decimals": 6,
+      "chainSupport": ["sepolia", "arbitrumSepolia", "arcTestnet"]
+    },
+    "EURC": {
+      "symbol": "EURC",
+      "address": "0x0000000000000000000000000000000000000000",
+      "decimals": 6,
+      "chainSupport": ["arcTestnet"]
+    },
+    "cirBTC": {
+      "symbol": "cirBTC",
+      "address": "0x0000000000000000000000000000000000000000",
+      "decimals": 18,
+      "chainSupport": ["arcTestnet"]
+    }
+  },
+  "features": {
+    "walletConnect": true,
+    "networkSwitch": true,
+    "ethTransfer": true,
+    "erc20Transfer": true,
+    "txChecker": true,
+    "swap": false,
+    "bridge": false,
+    "staking": false,
+    "liquidity": false
+  },
+  "ui": {
+    "theme": "dark",
+    "primaryColor": "#4f7cff",
+    "layout": "dashboard"
+  }
+}
