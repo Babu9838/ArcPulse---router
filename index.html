@@ -1,0 +1,174 @@
+# ArcPulse---router
+ArcPulse - Smart value router MVP on Arc. A simple web app that routes transaction accross chain. 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ARC Multi Token Transfer</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0b0f1a;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+.card {
+  background: #151c2c;
+  padding: 15px;
+  margin: 10px auto;
+  width: 420px;
+  border-radius: 10px;
+}
+input, select, button {
+  width: 90%;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 6px;
+  border: none;
+}
+button {
+  background: #4f7cff;
+  color: white;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚀 ARC Multi-Token DApp</h1>
+
+<div class="card">
+  <button onclick="connectWallet()">🔌 Connect Wallet</button>
+  <p id="wallet">Not connected</p>
+</div>
+
+<div class="card">
+  <h3>🔁 Switch Network</h3>
+  <button onclick="switchNetwork(11155111)">Sepolia</button>
+  <button onclick="switchNetwork(421614)">Arbitrum Sepolia</button>
+  <button onclick="switchNetwork(5042002)">ARC Testnet</button>
+</div>
+
+<div class="card">
+  <h3>💸 Token Transfer</h3>
+
+  <select id="tokenType">
+    <option value="ETH">ETH</option>
+    <option value="USDC">USDC</option>
+    <option value="EURC">EURC</option>
+    <option value="CIRBTC">cirBTC</option>
+  </select>
+
+  <input id="to" placeholder="Receiver Address" />
+  <input id="amount" placeholder="Amount" />
+
+  <button onclick="sendToken()">Send</button>
+</div>
+
+<div class="card">
+  <h3>🔍 Tx Hash Check</h3>
+  <input id="hash" placeholder="Tx Hash" />
+  <button onclick="checkTx()">Check</button>
+  <pre id="txinfo"></pre>
+</div>
+
+<script>
+let provider;
+let signer;
+
+// ⚠️ TOKEN ADDRESSES (IMPORTANT: change if ARC testnet uses different)
+const tokens = {
+  USDC: {
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    decimals: 6
+  },
+  EURC: {
+    address: "0x0000000000000000000000000000000000000000",
+    decimals: 6
+  },
+  CIRBTC: {
+    address: "0x0000000000000000000000000000000000000000",
+    decimals: 18
+  }
+};
+
+// ERC20 ABI (minimal)
+const abi = [
+  "function transfer(address to, uint amount) returns (bool)",
+  "function decimals() view returns (uint8)"
+];
+
+// CONNECT WALLET
+async function connectWallet() {
+  if (!window.ethereum) return alert("Install MetaMask");
+
+  provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  signer = await provider.getSigner();
+
+  const addr = await signer.getAddress();
+  document.getElementById("wallet").innerText = "Connected: " + addr;
+}
+
+// SWITCH NETWORK
+async function switchNetwork(chainId) {
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0x" + chainId.toString(16) }]
+    });
+  } catch (e) {
+    alert("Add network in wallet first");
+  }
+}
+
+// SEND ETH OR TOKEN
+async function sendToken() {
+  const type = document.getElementById("tokenType").value;
+  const to = document.getElementById("to").value;
+  const amount = document.getElementById("amount").value;
+
+  if (type === "ETH") {
+    const tx = await signer.sendTransaction({
+      to,
+      value: ethers.parseEther(amount)
+    });
+
+    alert("ETH TX: " + tx.hash);
+    return;
+  }
+
+  // ERC20 TRANSFER
+  const token = tokens[type];
+
+  if (!token.address || token.address.includes("0000")) {
+    alert("Token address not set for " + type);
+    return;
+  }
+
+  const contract = new ethers.Contract(token.address, abi, signer);
+
+  const value = ethers.parseUnits(amount, token.decimals);
+
+  const tx = await contract.transfer(to, value);
+
+  alert(type + " TX: " + tx.hash);
+}
+
+// CHECK TX
+async function checkTx() {
+  const hash = document.getElementById("hash").value;
+
+  const tx = await provider.getTransaction(hash);
+
+  document.getElementById("txinfo").innerText =
+    JSON.stringify(tx, null, 2);
+}
+</script>
+
+</body>
+</html>
